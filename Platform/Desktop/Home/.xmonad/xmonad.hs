@@ -78,9 +78,9 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     [ ((modm .|. shiftMask, xK_Return), spawn $ XMonad.terminal conf)
       
     -- volume keys
-    , ((0, xF86XK_AudioMute),        spawn "pactl set-sink-mute @DEFAULT_SINK@ toggle")
-    , ((0, xF86XK_AudioLowerVolume), spawn "pactl set-sink-volume @DEFAULT_SINK@ -5%")
-    , ((0, xF86XK_AudioRaiseVolume), spawn "pactl set-sink-volume @DEFAULT_SINK@ +5%")
+    , ((0, xF86XK_AudioMute         ), spawn "pactl set-sink-mute @DEFAULT_SINK@ toggle")
+    , ((0, xF86XK_AudioLowerVolume  ), spawn "pactl set-sink-volume @DEFAULT_SINK@ -5%")
+    , ((0, xF86XK_AudioRaiseVolume  ), spawn "pactl set-sink-volume @DEFAULT_SINK@ +5%")
  
     -- launch dmenu
     , ((modm .|. shiftMask, xK_p     ), spawn "dmenu_run -fn 'Source Code Pro-14'")
@@ -222,7 +222,7 @@ myLayout = avoidStruts (tiled ||| Mirror tiled ||| Full)
      -- Percent of screen to increment by when resizing panes
      delta   = 3/100
 
--- Set up xmobar as status bar --
+-- Set up xmobar as status bar; create .xmobarrc in HOME directory --
 
 -- Command to launch the bar.
 myBar = "xmobar"
@@ -310,7 +310,7 @@ myStartupHook = do
 	setWMName "Fichtner"
 	spawnOnce "nitrogen --restore &"
 	spawnOnce "picom &"
-        spawnOnce "dropbox start &"
+  spawnOnce "dropbox start &"
 	spawnOnce "/home/benjamin/.xmonad/scripts/1440p.sh &"
 
 ------------------------------------------------------------------------
@@ -320,7 +320,6 @@ myStartupHook = do
 --
 main :: IO ()
 main = do
-  -- xmproc0 <- spawnPipe "xmobar -x 0 /home/benjamin/.config/xmobar/xmobarrc0"
   xmproc1 <- spawnPipe "xmobar -x 0 /home/benjamin/.config/xmobar/xmobarrc1"
   xmonad =<< statusBar myBar myPP toggleStrutsKey defaults  
 
