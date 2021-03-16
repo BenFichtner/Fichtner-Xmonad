@@ -1,0 +1,132 @@
+Config { 
+
+   -- appearance
+     font =         "xft:Source Code Pro:size=10:bold:antialias=true"
+   , bgColor =      "black"
+   , fgColor =      "#E10600"
+   , position =     Top
+   , border =       BottomB
+   , borderColor =  "#646464"
+
+   -- layout
+   , sepChar =  "%"   -- delineator between plugin names and straight text
+   , alignSep = "}{"  -- separator between left-right alignment
+   , template = "| <action=gnome-control-center wifi>%wi%</action> | <action=gnome-control-center network>%dynnetwork%</action> | <action='gnome-system-monitor'>%multicpu% %cpufreq% | %memory%</action> |}{| <action='gnome-weather'>%KYKM%</action> | <action=gnome-control-center datetime>%date%</action> | <action=gnome-control-center power>%battery%</action> <action=gnome-control-center power>%bright%</action> | <action=gnome-control-center sound>%myvolume%</action> |"
+
+   -- general behavior
+   , lowerOnStart =     True    -- send to bottom of window stack on start
+   , hideOnStart =      False   -- start with window unmapped (hidden)
+   , allDesktops =      True    -- show on all desktops
+   , overrideRedirect = True    -- set the Override Redirect flag (Xlib)
+   , pickBroadest =     False   -- choose widest display (multi-monitor)
+   , persistent =       True    -- enable/disable hiding (True = disabled)
+
+   -- plugins
+   --   Numbers can be automatically colored according to their value. xmobar
+   --   decides color based on a three-tier/two-cutoff system, controlled by
+   --   command options:
+   --     --Low sets the low cutoff
+   --     --High sets the high cutoff
+   --
+   --     --low sets the color below --Low cutoff
+   --     --normal sets the color between --Low and --High cutoffs
+   --     --High sets the color above --High cutoff
+   --
+   --   The --template option controls how the plugin is displayed. Text
+   --   color can be set by enclosing in <fc></fc> tags. For more details
+   --   see http://projects.haskell.org/xmobar/#system-monitor-plugins.
+   , commands = 
+
+        -- weather monitor
+        [ Run Weather "KYKM" [ "--template", "<fc=#0000CD><station></fc> <skyCondition> <fc=#4682B4><tempC></fc>°C"
+                             ] 36000
+
+        -- network activity monitor (dynamic interface resolution)
+		-- removed ":<tx>kB/s|<rx>kB/s" from template to save space
+
+        , Run DynNetwork     [ "--template" , "<fc=#0000CD><dev></fc>"
+                             , "--Low"      , "1000"       -- units: B/s
+                             , "--High"     , "5000"       -- units: B/s
+                             , "--low"      , "darkgreen"
+                             , "--normal"   , "darkorange"
+                             , "--high"     , "darkred"
+                             ] 10 
+
+	-- battery monitor
+	-- Changed battery specific options: discharging <left> (<timeleft>)
+        , Run Battery        [ "--template" , "BAT:<acstatus>"
+
+                             , "--Low"      , "10"        -- units: %
+                             , "--High"     , "80"        -- units: %
+                             , "--low"      , "darkred"
+                             , "--normal"   , "darkorange"
+                             , "--high"     , "darkgreen"
+                             , "--ddigits"  , "2"
+                             , "--suffix"   , "True"
+                             , "--minwidth" , "0"
+
+                             , "--" -- battery specific options
+                                       -- discharging status
+                                       , "-o"	, "<left> --"
+                                       -- AC "on" status
+                                       , "-O"	, "<left> <fc=#228B22>++</fc>"
+                                       -- charged status
+                                       , "-i"	, "<left> <fc=#006000>F</fc>"
+                             ] 50
+
+	  -- cpu activity monitor
+        , Run MultiCpu       [ "--template" , "<fc=#0000CD>CPU</fc>:<total0>|<total1>|<total2>|<total3>"
+                             , "--Low"      , "50"         -- units: %
+                             , "--High"     , "85"         -- units: %
+                             , "--low"      , "darkgreen"
+                             , "--normal"   , "darkorange"
+                             , "--high"     , "darkred"
+                             , "--ppad"     , "2"
+                             , "--ddigits"  , "2"
+                             , "--suffix"   , "True"
+			     ] 10
+
+
+        -- wifi
+	, Run Wireless	 "" [ "--template" , "<fc=#FFD700><essid></fc> <fc=#FF4500><qualityvbar></fc>" 
+                            ] 10	
+	
+        -- CPU Frequency
+        , Run CpuFreq       [ "--template" , "<fc=#0000CD>GHZ</fc>:<cpu0>|<cpu1>|<cpu2>|<cpu3>"
+                            , "-L"         , "0"
+                            , "-H"         , "2"
+                            , "-l"         , "lightblue"
+                            , "-n"         , "white"
+                            , "-h"         , "red"
+                            , "--ppad"     , "2"
+                            , "--ddigits"  , "2"
+                            , "--suffix"   , "false"
+                            ] 50
+        -- volume mixer
+
+	, Run Com "/bin/get-volume.sh"     [] "myvolume" 1
+
+	-- brightness
+
+	, Run Brightness     [ "--template"  , "LCD:<percent>%"
+			     , "--" , "-D" , "radeon_bl0"
+		             ] 1
+	
+	-- memory usage monitor
+
+        , Run Memory         [ "--template" , "<fc=#0000CD>MEM</fc>:<usedratio>%"
+                             , "--Low"      , "20"        -- units: %
+                             , "--High"     , "90"        -- units: %
+                             , "--low"      , "darkgreen"
+                             , "--normal"   , "darkorange"
+                             , "--high"     , "darkred"
+                             ] 10
+
+        -- time and date indicator 
+	-- Removed from Template: %Y (for year)
+        --   (%F = y-m-d date, %a = day of week, %T = h:m:s time)
+        
+	, Run Date           "<fc=#0000CD>%a %_d %b</fc><fc=#1E90FF> %H:%M:%S</fc>" "date" 10
+
+     		] 10
+}
